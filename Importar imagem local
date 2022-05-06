@@ -1,0 +1,19 @@
+- Importar uma **PASTA** LOCAL com imagens
+- Nessa tabela, manter apenas os campos NOME e BINARIO
+- Na coluna BINARIO, Invoca a função personalizada (Codigo abaixo)
+
+
+let
+   converterImagem = (Binario as binary) as text =>
+let
+   Base64= "data:image/jpeg;base64, " & Binary.ToText(Binario, BinaryEncoding.Base64)
+in
+  Base64
+in 
+  converterImagem
+  
+  
+- Esse código serve para transformar BINÁRIO em text (URL da Imagem)
+
+Video Explicativo:
+https://www.youtube.com/watch?v=dw5zWtYw8Vk&t=774s&ab_channel=LuizFilipe
