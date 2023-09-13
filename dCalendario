@@ -1,0 +1,26 @@
+let
+    DataMin = List.Min(fVendas[Data]),
+    AnoMin = Date.Year(DataMin),
+    DataMax = List.Max(fVendas[Data]),
+    AnoMax = Date.Year(DataMax),
+    DataInicial = #date(AnoMin, 01, 01),
+    DataFinal = #date(AnoMax, 12, 31),
+    Duracao = Duration.Days(DataFinal - DataInicial) + 1,
+   
+    Fonte = List.Dates(DataInicial, Duracao, #duration(1, 0, 0, 0)),
+    #"Convertido para Tabela" = Table.FromList(Fonte, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colunas Renomeadas" = Table.RenameColumns(#"Convertido para Tabela",{{"Column1", "Data"}}),
+    #"Ano Inserido" = Table.AddColumn(#"Colunas Renomeadas", "Ano", each Date.Year([Data]), Int64.Type),
+    #"Mês Inserido" = Table.AddColumn(#"Ano Inserido", "Mês", each Date.Month([Data]), Int64.Type),
+    #"Dia Inserido" = Table.AddColumn(#"Mês Inserido", "Dia", each Date.Day([Data]), Int64.Type),
+    #"Nome do Mês Inserido" = Table.AddColumn(#"Dia Inserido", "Nome do Mês", each Date.MonthName([Data]), type text),
+    #"Tipo Alterado" = Table.TransformColumnTypes(#"Nome do Mês Inserido",{{"Data", type date}}), 
+    #"Trimestre" = Table.AddColumn(#"Tipo Alterado" , "Trimestre", each "Trim " & Number.ToText(Date.QuarterOfYear([Data])), type text),
+    #"NumeroSemana" = Table.AddColumn(Trimestre , "Número Semana", each Date.WeekOfYear([Data]), Int64.Type),
+    #"DataINT" = Table.AddColumn(NumeroSemana, "DateInt", each [Ano]*100 + [Mês], Int64.Type),
+    #"DiaDaSemana" = Table.AddColumn(DataINT , "Dia da Semana", each Date.ToText([Data],"dddd"), type text),
+    #"MesAno" = Table.AddColumn(DiaDaSemana, "Mês Ano", each Text.Combine({Text.From([Mês], "pt-BR"), Text.From([Ano], "pt-BR")}, "-"), type text),
+    #"Primeiros caracteres extraídos" = Table.TransformColumns(MesAno, {{"Nome do Mês", each Text.Start(_, 3), type text}}),
+    #"Coluna Mesclada Inserida" = Table.AddColumn(#"Primeiros caracteres extraídos", "Mes/Ano", each Text.Combine({[Nome do Mês], Text.From([Ano], "pt-BR")}, "/"), type text)
+in
+    #"Coluna Mesclada Inserida"
